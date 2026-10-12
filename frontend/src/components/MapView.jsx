@@ -6,9 +6,14 @@ import { levelColor, METRICS, toRiskScale } from "../lib/risk.js";
 import { fmtDuration, fmtMiles, fmtDateTime } from "../lib/format.js";
 import { positionAt, valueAt } from "../lib/track.js";
 
-const TILE_URL = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+// Esri's light-grey canvas needs no API key and keeps the heatmap readable.
+// Override with VITE_TILE_URL / VITE_TILE_ATTRIBUTION at build time to use another provider.
+const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas";
+const TILE_URL = import.meta.env.VITE_TILE_URL || `${ESRI}/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`;
+const LABELS_URL = import.meta.env.VITE_TILE_URL ? null : `${ESRI}/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`;
 const TILE_ATTR =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a> | Routing <a href="https://project-osrm.org">OSRM</a> | Weather <a href="https://open-meteo.com">Open-Meteo</a>';
+  import.meta.env.VITE_TILE_ATTRIBUTION ||
+  'Basemap &copy; <a href="https://www.esri.com">Esri</a>, HERE, Garmin, &copy; OpenStreetMap contributors | Routing <a href="https://project-osrm.org">OSRM</a> | Weather <a href="https://open-meteo.com">Open-Meteo</a>';
 
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
@@ -47,9 +52,16 @@ export default function MapView({ result, selectedId, onSelect, hour, metric, sh
   useEffect(() => {
     const map = L.map(el.current, { zoomControl: false, preferCanvas: true, worldCopyJump: true }).setView([39.5, -96], 4);
     L.control.zoom({ position: "bottomright" }).addTo(map);
-    L.tileLayer(TILE_URL, { attribution: TILE_ATTR, subdomains: "abcd", maxZoom: 18, detectRetina: true }).addTo(map);
+    L.tileLayer(TILE_URL, { attribution: TILE_ATTR, maxZoom: 16 }).addTo(map);
     map.createPane("routes").style.zIndex = 420;
     map.createPane("points").style.zIndex = 450;
+    if (LABELS_URL) {
+      // Place names drawn above the heatmap and routes so they stay legible.
+      const labels = map.createPane("labels");
+      labels.style.zIndex = 460;
+      labels.style.pointerEvents = "none";
+      L.tileLayer(LABELS_URL, { pane: "labels", maxZoom: 16 }).addTo(map);
+    }
     layers.current.heat = new CorridorHeatLayer({ pane: "overlayPane" });
     mapRef.current = map;
     const ro = new ResizeObserver(() => map.invalidateSize());

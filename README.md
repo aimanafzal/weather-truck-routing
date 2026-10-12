@@ -15,7 +15,7 @@ weather the truck will actually meet at each point along the way, the load weigh
 
 No API keys are needed: routing is [OSRM](https://project-osrm.org), weather is
 [Open-Meteo](https://open-meteo.com), place search is [Photon](https://photon.komoot.io) (OpenStreetMap),
-and map tiles are CARTO/OpenStreetMap.
+and the basemap is Esri's keyless light-grey canvas (override with `VITE_TILE_URL`).
 
 ---
 
