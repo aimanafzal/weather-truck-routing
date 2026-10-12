@@ -1,0 +1,788 @@
+:root {
+  --asphalt: #1f2a30;
+  --asphalt-2: #26343c;
+  --asphalt-3: #2f3f48;
+  --line: #3d4e59;
+  --text: #eef2f4;
+  --muted: #a7b5be;
+  --sign-green: #0b6e4f;
+  --sign-green-hi: #13a576;
+  --sign-yellow: #f2b705;
+  --paper: #f7f8f6;
+  --ink: #1b262c;
+  --danger: #ff8a7a;
+  --radius-s: 4px;
+  --radius-m: 8px;
+  --font: "Overpass", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.45;
+  background: var(--asphalt);
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+:focus-visible {
+  outline: 2px solid var(--sign-yellow);
+  outline-offset: 2px;
+}
+.muted {
+  color: var(--muted);
+}
+.small {
+  font-size: 13px;
+}
+
+/* ---------- layout */
+.app {
+  display: grid;
+  grid-template-columns: minmax(360px, 420px) 1fr;
+  height: 100%;
+}
+.panel {
+  overflow-y: auto;
+  padding: 22px 22px 40px;
+  border-right: 1px solid #12191d;
+  scrollbar-width: thin;
+}
+.map-area {
+  position: relative;
+  min-height: 0;
+}
+.map {
+  position: absolute;
+  inset: 0;
+  background: #dfe5e8;
+}
+
+/* ---------- brand */
+.brand {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+.brand-mark {
+  width: 36px;
+  height: 36px;
+  flex: none;
+}
+.brand h1 {
+  font-size: 21px;
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 2px 0 4px;
+  letter-spacing: -0.01em;
+}
+.brand p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ---------- form */
+.trip-form {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  background: var(--asphalt-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+}
+.field {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.field label,
+.field legend {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 0;
+  margin-bottom: 5px;
+}
+.field input[type="text"],
+.field input[type="number"],
+.field input[type="datetime-local"],
+.forecast-bar select {
+  width: 100%;
+  height: 40px;
+  padding: 0 11px;
+  background: var(--asphalt);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  color: var(--text);
+}
+.field input:focus {
+  border-color: var(--sign-yellow);
+  outline: none;
+}
+.row {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 10px;
+}
+.place {
+  position: relative;
+}
+.suggestions {
+  position: absolute;
+  z-index: 1200;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 4px 0 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: var(--radius-s);
+  box-shadow: 0 10px 30px rgba(5, 12, 16, 0.45);
+  max-height: 260px;
+  overflow-y: auto;
+}
+.suggestions li {
+  padding: 8px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.suggestions li.active {
+  background: #dbe8e2;
+}
+.suggestions li.status {
+  color: #59666e;
+  cursor: default;
+}
+.examples {
+  margin: -2px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+.link {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: #9fd9c3;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  overflow: hidden;
+}
+.segmented label {
+  margin: 0;
+  text-align: center;
+  padding: 8px 0 7px;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  background: var(--asphalt);
+}
+.segmented label + label {
+  border-left: 1px solid var(--line);
+}
+.segmented label.on {
+  background: var(--sign-green);
+}
+.segmented input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.segmented label:has(input:focus-visible) {
+  outline: 2px solid var(--sign-yellow);
+  outline-offset: -2px;
+}
+.check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+  cursor: pointer;
+}
+.check input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--sign-green-hi);
+}
+.primary {
+  height: 46px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: var(--sign-green);
+  color: #fff;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.85), inset 0 0 0 4px var(--sign-green);
+}
+.primary:hover {
+  background: #0d7d5a;
+}
+.primary:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+.form-error,
+.alert {
+  margin: 0;
+  color: var(--danger);
+  font-size: 14px;
+}
+.alert {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid #7a3b35;
+  background: #3a2624;
+  border-radius: var(--radius-m);
+  color: #ffd2cb;
+}
+.empty {
+  margin: 22px 4px;
+  font-size: 14px;
+}
+
+/* ---------- results */
+.results {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+.verdict {
+  padding: 12px 14px;
+  border-left: 4px solid var(--sign-green-hi);
+  background: #213a33;
+  border-radius: 0 var(--radius-m) var(--radius-m) 0;
+}
+.verdict p {
+  margin: 0;
+  font-weight: 600;
+}
+.verdict.warn {
+  border-left-color: #b46cf0;
+  background: #2f2640;
+}
+.verdict .warning {
+  margin-top: 6px;
+  font-weight: 400;
+  color: #e5cff9;
+}
+.route-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+.route-card {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  background: var(--asphalt-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.route-card:hover {
+  border-color: #5a6f7c;
+}
+.route-card.selected {
+  background: var(--asphalt-3);
+  border-color: var(--sign-yellow);
+  box-shadow: inset 3px 0 0 var(--sign-yellow);
+}
+.route-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* Interstate-style shield carrying the route letter */
+.shield {
+  flex: none;
+  width: 30px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding-top: 4px;
+  font-weight: 800;
+  font-size: 15px;
+  color: #fff;
+  background: linear-gradient(#c8102e 0 26%, #fff 26% 30%, #1d4f91 30%);
+  clip-path: path("M15 0 C21 3 27 2 30 0 C31 12 29 24 15 32 C1 24 -1 12 0 0 C3 2 9 3 15 0 Z");
+}
+.route-title {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+}
+.route-title strong {
+  font-size: 16px;
+}
+.via {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.best-plate {
+  flex: none;
+  padding: 4px 8px 2px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+  background: var(--sign-green);
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1.5px #fff, inset 0 0 0 3px var(--sign-green);
+}
+.route-figures {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+}
+.route-figures dt {
+  font-size: 12px;
+  color: var(--muted);
+}
+.route-figures dd {
+  margin: 0;
+  font-weight: 700;
+  font-size: 15px;
+}
+.ribbon {
+  position: relative;
+  display: flex;
+  height: 12px;
+  border-radius: 2px;
+  overflow: visible;
+  margin-bottom: 14px;
+  background: var(--line);
+}
+.ribbon > span:not(.ribbon-scale) {
+  height: 100%;
+  min-width: 1px;
+}
+.ribbon > span:first-child {
+  border-radius: 2px 0 0 2px;
+}
+.ribbon-scale {
+  position: absolute;
+  top: 15px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+}
+.route-flags {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text);
+}
+.flag i {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+}
+.rank-note {
+  margin: 0 2px;
+}
+
+/* ---------- checkpoint table */
+.checkpoints h3 {
+  margin: 12px 0 2px;
+  font-size: 16px;
+}
+.checkpoints p {
+  margin: 0 0 8px;
+}
+.table-wrap {
+  max-height: 340px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+}
+.checkpoints table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.checkpoints th {
+  position: sticky;
+  top: 0;
+  background: var(--asphalt-3);
+  text-align: left;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 7px 8px;
+}
+.checkpoints td {
+  padding: 6px 8px;
+  border-top: 1px solid #2c3a42;
+  white-space: nowrap;
+}
+.level-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.level-chip::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--c);
+}
+
+/* ---------- map overlays */
+.map-loading {
+  position: absolute;
+  z-index: 1000;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 16px;
+  background: var(--asphalt);
+  border-radius: 999px;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--line);
+  border-top-color: var(--sign-yellow);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.forecast-bar {
+  position: absolute;
+  z-index: 1000;
+  left: 16px;
+  right: 64px;
+  bottom: 18px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 12px 16px 10px;
+  background: rgba(31, 42, 48, 0.94);
+  backdrop-filter: blur(6px);
+  border-radius: var(--radius-m);
+  box-shadow: 0 8px 28px rgba(10, 20, 26, 0.35);
+}
+.fb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.play {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--sign-yellow);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.play svg {
+  width: 14px;
+  height: 14px;
+  fill: var(--ink);
+}
+.fb-time {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.2;
+}
+.fb-time strong {
+  font-size: 16px;
+}
+.fb-time span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.fb-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.forecast-bar select {
+  width: auto;
+  height: 34px;
+  font-size: 13px;
+}
+.fb-slider {
+  width: 100%;
+  margin: 10px 0 0;
+  accent-color: var(--sign-yellow);
+  height: 22px;
+}
+.fb-ticks {
+  position: relative;
+  height: 14px;
+  margin: 0 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.fb-ticks span {
+  position: absolute;
+  transform: translateX(-50%);
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 6px;
+  font-size: 12px;
+}
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.legend i {
+  width: 14px;
+  height: 8px;
+  border-radius: 2px;
+}
+.legend em {
+  font-style: normal;
+  color: var(--muted);
+}
+.legend .unit {
+  color: var(--muted);
+  margin-left: auto;
+}
+
+/* ---------- leaflet bits */
+.leaflet-container {
+  font-family: var(--font);
+}
+.route-label {
+  background: var(--paper);
+  color: var(--ink);
+  border: 0;
+  border-radius: 4px;
+  padding: 5px 8px 3px;
+  font-size: 12px;
+  line-height: 1.3;
+  box-shadow: 0 2px 8px rgba(20, 30, 36, 0.3);
+  opacity: 0.88 !important;
+}
+.route-label.is-selected {
+  opacity: 1 !important;
+  outline: 2px solid var(--sign-yellow);
+}
+.route-label.is-best b {
+  color: var(--sign-green);
+}
+.route-label::before {
+  display: none;
+}
+.pin {
+  display: grid;
+  place-items: center;
+}
+.pin span {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-weight: 800;
+  font-size: 13px;
+  color: #fff;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+.pin-origin span {
+  background: var(--sign-green);
+}
+.pin-dest span {
+  background: #1d4f91;
+}
+.pin-stop span {
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+  background: var(--asphalt);
+}
+.truck span {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--sign-yellow);
+  border: 3px solid var(--ink);
+  box-shadow: 0 0 0 3px rgba(242, 183, 5, 0.35);
+}
+.cp-popup .leaflet-popup-content-wrapper {
+  border-radius: var(--radius-m);
+  color: var(--ink);
+}
+.cp-popup .leaflet-popup-content,
+.leaflet-popup-content {
+  margin: 12px 14px;
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--ink);
+}
+.pop-head {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 14px;
+}
+.pop-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.pop-sub {
+  color: #59666e;
+}
+.pop-level {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 4px 0;
+}
+.pop-wx {
+  border-collapse: collapse;
+  width: 100%;
+}
+.pop-wx td {
+  padding: 2px 6px 2px 0;
+}
+.pop-wx td:last-child {
+  color: #59666e;
+  text-align: right;
+}
+.pop .muted {
+  color: #6c7a82;
+}
+.pop-reasons {
+  margin: 6px 0 0;
+  padding-left: 16px;
+  color: #3d4a51;
+}
+
+/* ---------- small screens: map on top, panel below */
+@media (max-width: 860px) {
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 66vh auto;
+    height: auto;
+    min-height: 100%;
+  }
+  .map-area {
+    order: -1;
+    height: 66vh;
+  }
+  .panel {
+    overflow: visible;
+    padding: 18px 16px 32px;
+    border-right: 0;
+  }
+  .forecast-bar {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    padding: 8px 10px;
+  }
+  .legend em,
+  .fb-ticks,
+  .fb-time span {
+    display: none;
+  }
+  .legend {
+    gap: 2px 10px;
+    font-size: 11px;
+  }
+  .fb-slider {
+    margin-top: 4px;
+  }
+  /* summaries live in the route cards below the map on phones */
+  .route-label {
+    display: none;
+  }
+  .fb-toggle {
+    display: none;
+  }
+  .route-figures {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 3s;
+  }
+  .route-card {
+    transition: none;
+  }
+}
+
+.field input {
+  min-width: 0;
+}
+.leaflet-container:focus-visible {
+  outline-offset: -3px;
+}
