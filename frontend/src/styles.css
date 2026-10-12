@@ -728,13 +728,13 @@ select {
 @media (max-width: 860px) {
   .app {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: 66vh auto;
+    grid-template-rows: 55vh auto;
     height: auto;
     min-height: 100%;
   }
   .map-area {
     order: -1;
-    height: 66vh;
+    height: 55vh;
   }
   .panel {
     overflow: visible;

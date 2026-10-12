@@ -52,6 +52,15 @@ export default function MapView({ result, selectedId, onSelect, hour, metric, sh
   useEffect(() => {
     const map = L.map(el.current, { zoomControl: false, preferCanvas: true, worldCopyJump: true }).setView([39.5, -96], 4);
     L.control.zoom({ position: "bottomright" }).addTo(map);
+    // On narrow screens the map sits in the page flow, so the mouse wheel must scroll the
+    // page rather than zoom the map. Wheel-zoom turns on after a click on the map and off
+    // again when the pointer leaves it.
+    const narrow = window.matchMedia("(max-width: 860px)");
+    const syncWheel = () => (narrow.matches ? map.scrollWheelZoom.disable() : map.scrollWheelZoom.enable());
+    syncWheel();
+    narrow.addEventListener?.("change", syncWheel);
+    map.on("click", () => map.scrollWheelZoom.enable());
+    map.on("mouseout", syncWheel);
     L.tileLayer(TILE_URL, { attribution: TILE_ATTR, maxZoom: 16 }).addTo(map);
     map.createPane("routes").style.zIndex = 420;
     map.createPane("points").style.zIndex = 450;
@@ -67,6 +76,7 @@ export default function MapView({ result, selectedId, onSelect, hour, metric, sh
     const ro = new ResizeObserver(() => map.invalidateSize());
     ro.observe(el.current);
     return () => {
+      narrow.removeEventListener?.("change", syncWheel);
       ro.disconnect();
       map.remove();
     };
